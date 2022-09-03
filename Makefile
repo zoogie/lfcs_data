@@ -41,10 +41,6 @@ GFXBUILD	:=	$(BUILD)
 #ROMFS		:=	romfs
 #GFXBUILD	:=	$(ROMFS)/gfx
 
-APP_TITLE 	:=   lfcs_data
-APP_DESCRIPTION :=   another seedminer companion app
-APP_AUTHOR 	:=   zoogie
-
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
@@ -52,6 +48,7 @@ ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
 CFLAGS	:=	-g -Wall -O2 -mword-relocations \
 			-ffunction-sections \
+			`curl-config --cflags` \
 			$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -D__3DS__
@@ -59,9 +56,9 @@ CFLAGS	+=	$(INCLUDE) -D__3DS__
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map) -Wl,--no-gc-sections
 
-LIBS	:= -lctru -lm
+LIBS	:= 	`curl-config --libs`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

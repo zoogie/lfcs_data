@@ -55,6 +55,5 @@ dkms.conf
 *.3dsx
 *.smdh
 *.cia
-*.bat
 *.lst
 *.txt

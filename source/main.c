@@ -15,40 +15,56 @@ int main(int argc, char* argv[])
 	Result res=0;
 	u8 lfcsdata[0x100]={0};
 	u8 mac[6]={0};
-	char filename[100]={0};
+	char filename[0x100]={0};
 	u64 lfcs=0;
+	u64 lfcs2=0;
+	u8 lfcs_match=0xff;
 	u32 device_id=0;
+	u64 mask=0x3ffffffff;
 	
-	srand(time(NULL));
+	//srand(time(NULL));
 	res = psInit();
+	cfguInit();
 	
-	printf("lfcs_data v1.0\n\n");
+	printf("lfcs_data v1.0\n\n");  
 	
 	if(res==0){
 		
 		getMac(mac);         //funfact: the mac address is also conveniently found in mii qr codes
 		
-		printf("MAC:   ");     
+		printf("MAC:        ");    
 		for(int i=0;i<6;i++) printf("%02X ", (int)mac[i]);
 		printf("\n");
 		
 		res = PS_GetLocalFriendCodeSeed(&lfcs);
-		if(res) printf("getLFCS:  %08X fail\n", (int)res);
-		printf("LFCS:  %010llX\n", lfcs);
+		if(res) printf("getLFCS:    %08X fail\n", (int)res);
+		printf("LFCS:       %010llX\n", lfcs);
+		
+		res = CFGU_GetConfigInfoBlk2(8, 0x90000, &lfcs2);
+		if(res) printf("getLFCS2:    %08X fail\n", (int)res);
+		printf("LFCS2:      %010llX\n", lfcs2);
 		
 		res = PS_GetDeviceId(&device_id);
-		if(res) printf("getDevID: %08X fail\n", (int)res);
-		printf("DevID: %08X\n", (int)device_id);
+		if(res) printf("getDevID:   %08X fail\n", (int)res);
+		printf("DevID:      %08X\n", (int)device_id);
 		
-		lfcs=(lfcs & 0xffffffffffffff00)+0x80;    //truncate unneeded precision
-		device_id=(device_id & 0xffffff00)+0x80;  //""
+		lfcs_match = ((lfcs & mask) == (lfcs2 & mask)) ? 1:0;
+		lfcs=(lfcs & 0xfffffffffffffff0)+0x8;    //truncate unneeded precision
+		device_id=(device_id & 0xfffffff0)+0x8;  //""
+		
+		if(lfcs_match==1) printf("Movable:    Native\n");
+		else if(lfcs_match==0) printf("Movable:    Guest\n");
+		else printf("Movable:    ???\n");
+		
+		//printf("Time:       %llX\n", osGetTime());
 		
 		memcpy(lfcsdata, mac, 3);
 		memset(lfcsdata+3, 0xff, 3);
 		memcpy(lfcsdata+0x10, &lfcs, 8);
 		memcpy(lfcsdata+0x20, &device_id, 4);
+		memcpy(lfcsdata+0x30, &lfcs_match, 1);
 		
-		snprintf(filename, 90, "/lfcsdata_%08X.bin", (int)rand()); //rand in filename is just to make it easier to throw multiple files in a single input directory for processing
+		snprintf(filename, 128, "/lfcsdata_%llX.bin", osGetTime()); //osTime is just to make it easier to throw multiple files in a single input directory for processing
 		printf("\ndumping sdmc:%s...\n", filename);
 		
 		FILE *f=fopen(filename,"wb");
