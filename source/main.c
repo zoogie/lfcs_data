@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 		if(res) printf("getLFCS:    %08X fail\n", (int)res);
 		printf("LFCS:       %010llX\n", lfcs);
 		
-		res = CFGU_GetConfigInfoBlk2(8, 0x90000, &lfcs2);
+		res = CFGU_GetConfigInfoBlk2(8, 0x90001, &lfcs2);
 		if(res) printf("getLFCS2:    %08X fail\n", (int)res);
 		printf("LFCS2:      %010llX\n", lfcs2);
 		
