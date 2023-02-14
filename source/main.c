@@ -38,8 +38,20 @@ int main(int argc, char* argv[])
 		
 		res = PS_GetLocalFriendCodeSeed(&lfcs);
 		if(res) printf("getLFCS:    %08X fail\n", (int)res);
-		printf("LFCS:       %010llX\n", lfcs);
+		printf("LFCS:       %010llX\n\n", lfcs);
 		
+		//these 3 printouts are just for academic purposes (9000X blocks are very same-ish and the reason they may differ is still a mystery)
+		res = CFGU_GetConfigInfoBlk2(8, 0x90000, &lfcs2);
+		if(res) printf("get90000:    %08X fail\n", (int)res);
+		printf("90000:      %010llX\n", lfcs2);
+		res = CFGU_GetConfigInfoBlk2(8, 0x90001, &lfcs2);
+		if(res) printf("get90001:    %08X fail\n", (int)res);
+		printf("90001:      %010llX\n", lfcs2);
+		res = CFGU_GetConfigInfoBlk2(4, 0x90002, &lfcs2);
+		if(res) printf("get90002:    %08X fail\n", (int)res);
+		printf("90002:      %08llX\n\n", lfcs2 & 0xffffffff);
+		
+		//the real lfcs2 we use for data
 		res = CFGU_GetConfigInfoBlk2(8, 0x90001, &lfcs2);
 		if(res) printf("getLFCS2:    %08X fail\n", (int)res);
 		printf("LFCS2:      %010llX\n", lfcs2);
